@@ -98,7 +98,7 @@ public class MonthAnalsListAPI extends BaseAPI {
 				fw.flush();
 				fw.close();
 				
-				dbController.dumpMonthAnalsList(file.getPath());
+				dbController.dumpAnalsList(file.getPath());
 
 
 			}

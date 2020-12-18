@@ -1,15 +1,13 @@
 package base;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class JDBC {
 	protected Connection con = null;
-
-	private String url = "";
-	private String id = "";
-	private String pw = "";
 
 	public JDBC() {
 
@@ -68,5 +66,27 @@ public class JDBC {
 			return null;
 		}
 	}
+	public int dumpAnalsList(String filePath) {
+		int r = -1;
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			
+			Process pc = runtime.exec("cmd.exe /c mysql -h 150.183.116.231 -uroot -pkisti1004 --default-character-set=utf8 DisasterInformation < "+filePath);
+			BufferedReader bf = new BufferedReader(new InputStreamReader(pc.getInputStream()));
+			
+			String line="";
+			while((line = bf.readLine()) != null) {
+				System.out.println(line);
+			}
+			
+			System.out.println("Insert!");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return r;
+	}
+	
 
 }

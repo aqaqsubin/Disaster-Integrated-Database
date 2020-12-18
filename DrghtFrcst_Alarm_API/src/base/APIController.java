@@ -3,6 +3,7 @@ package base;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 
 import drghtFcltyCode.FcltyCodeDBController;
@@ -18,10 +19,9 @@ public class APIController {
 	private List<String> monthCal;
 	private Calendar from_dttm, to_dttm;
 
-	private String serviceKey = "";
-	private String fcltyDivCdFilePath = "FcltyDivCode_List.xlsx";
-	
 	private List<Long> fcltyCdList;
+	
+	private List<String> hjdCdList;
 
 	public APIController(String start_dttm, String end_dttm) {
 
@@ -46,6 +46,8 @@ public class APIController {
 		
 		FileController fileController = new FileController();
 		fcltyCdList = fileController.getCdList(fcltyDivCdFilePath);
+		
+		hjdCdList = null;
 
 		
 	}
@@ -171,7 +173,21 @@ public class APIController {
 	private List<String> getFcltyCd(long fcltyDivCode){
 
 		FcltyCodeDBController dbController = new FcltyCodeDBController();
-		return dbController.getFcltyCode(fcltyDivCode);
+		List<String> fcltyCd = dbController.getFcltyCode(fcltyDivCode);
+		
+		fcltyCd.sort(new Comparator<String>() {
+			@Override
+			public int compare(String o1, String o2) {
+				// TODO Auto-generated method stub
+				Long o12Long = Long.parseLong(o1);
+				Long o22Long = Long.parseLong(o2);
+				
+				return o12Long > o22Long ? 1 :
+					o12Long == o22Long ? 0 : -1;
+			}
+			
+		});
+		return fcltyCd;
 		
 	}
 	public int getDrghtWeekAnalsAPI() {
@@ -182,7 +198,9 @@ public class APIController {
 		
 		int r = -1;
 		
-		List<String> hjdCdList = getFcltyCd(1008);
+		if(hjdCdList == null ) 
+			hjdCdList = getFcltyCd(1008);
+		
 		for (int i = 0; i < hjdCdList.size(); i++) {
 
 			try {
@@ -214,7 +232,8 @@ public class APIController {
 		
 		int r = -1;
 		
-		List<String> hjdCdList = getFcltyCd(1008);
+		if(hjdCdList == null ) 
+			hjdCdList = getFcltyCd(1008);
 		
 		String stDt = cal2Str(from_dttm).substring(0, 6);
 		String edDt = cal2Str(to_dttm).substring(0, 6);

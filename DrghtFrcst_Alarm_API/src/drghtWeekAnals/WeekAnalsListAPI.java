@@ -13,21 +13,20 @@ import org.w3c.dom.NodeList;
 import base.BaseAPI;
 
 public class WeekAnalsListAPI extends BaseAPI {
-	
+
 	private String resultCode, resultMsg;
 	private ArrayList<WeekAnalsList> analsInfoArr;
 
 	private WeekAnalsDBController dbController;
 	private String sqlfilePath = "C:\\Users\\kisti_user\\Desktop\\DataON\\API\\Drght_Analysis\\tmpWeekAnals.sql";
 
-	public WeekAnalsListAPI(String service, String operation, String key, String hjdCd,
-			String stDt, String edDt) throws IOException {
+	public WeekAnalsListAPI(String service, String operation, String key, String hjdCd, String stDt, String edDt)
+			throws IOException {
 		super(service, operation, key, hjdCd, stDt, edDt);
 		// TODO Auto-generated constructor stub
 		dbController = new WeekAnalsDBController();
 		analsInfoArr = new ArrayList<>();
 	}
-	
 
 	public void parseResponse() {
 		Document doc = null;
@@ -35,24 +34,24 @@ public class WeekAnalsListAPI extends BaseAPI {
 
 		resultCode = null;
 		resultMsg = null;
-		
+
 		NodeList nList = null;
 		WeekAnalsList weekAnalsInfo;
 		Node nNode;
 		Element eElement;
-		
+
 		for (int idx = 0; idx < docList.size(); idx++) {
-			
+
 			doc = docList.get(idx);
-			
+
 			header = doc.getElementsByTagName("header");
-			
+
 			resultCode = getTagValue("resultCode", (Element) header.item(0));
 			resultMsg = getTagValue("resultMsg", (Element) header.item(0));
 			System.out.println(String.format("resultCode : %s, resultMsg : %s", resultCode, resultMsg));
 
 			nList = doc.getElementsByTagName("item");
-			
+
 			for (int ndIdx = 0; ndIdx < nList.getLength(); ndIdx++) {
 				nNode = nList.item(ndIdx);
 
@@ -64,7 +63,7 @@ public class WeekAnalsListAPI extends BaseAPI {
 					weekAnalsInfo.setHjdCd(getTagValue("hjdcd", eElement));
 					weekAnalsInfo.setHjdName(getTagValue("hjdnm", eElement));
 					weekAnalsInfo.setProsWeek(getTagValue("prsw", eElement));
-					
+
 					weekAnalsInfo.setPros1Week(getTagValue("prs1w", eElement));
 					weekAnalsInfo.setPros2Week(getTagValue("prs2w", eElement));
 					weekAnalsInfo.setPros3Week(getTagValue("prs3w", eElement));
@@ -75,7 +74,7 @@ public class WeekAnalsListAPI extends BaseAPI {
 			}
 
 		}
-		
+
 	}
 
 	public int insertDB() {
@@ -94,22 +93,21 @@ public class WeekAnalsListAPI extends BaseAPI {
 				fw = new FileWriter(file);
 				for (int arrIdx = 0; arrIdx < analsInfoArr.size(); arrIdx++) {
 					weekAnalsInfo = analsInfoArr.get(arrIdx);
-					
+
 					query = dbController.getInsertQuery(weekAnalsInfo);
 					fw.write(query + "\n");
 				}
 				fw.flush();
 				fw.close();
-				
-				dbController.dumpWeekAnalsList(file.getPath());
 
+				dbController.dumpAnalsList(file.getPath());
 
 			}
 
 		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		} finally {
-			if(dbController.connect())
+			if (dbController.connect())
 				dbController.closeConnection();
 		}
 		return result;
