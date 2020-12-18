@@ -1,8 +1,11 @@
 package occurrSpot;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -15,6 +18,9 @@ public class RedTideOccurSpotAPI extends BaseAPI {
 	private ArrayList<RedTideOccurSpot> occurSpotArr;
 
 	private OccurSpotDBController dbController;
+	
+	private String sqlfilePath = "C:\\Users\\kisti_user\\Desktop\\DataON\\API\\Drght_Analysis\\tmpRedTideOccursSpot.sql";
+
 
 
 	public RedTideOccurSpotAPI(String operation, String key, int pageNo, int numOfRows, String rdate)
@@ -26,63 +32,87 @@ public class RedTideOccurSpotAPI extends BaseAPI {
 	}
 
 	public void parseResponse() {
+		
+		Document doc = null;
+		NodeList header = null;
+
 		resultCode = null;
 		resultMsg = null;
-		
-		NodeList header = doc.getElementsByTagName("header");
-		
-		resultCode = getTagValue("resultCode", (Element) header.item(0));
-		resultMsg = getTagValue("resultMsg", (Element) header.item(0));
-		System.out.println(String.format("resultCode : %s, resultMsg : %s", resultCode, resultMsg));
-		
-		NodeList nList = doc.getElementsByTagName("items");
+
+		NodeList nList = null;
 		RedTideOccurSpot occurSpot;
 		
-		for(int idx = 0; idx < nList.getLength(); idx++){
-			Node nNode = nList.item(idx);
-			
-			if(nNode.getNodeType() == Node.ELEMENT_NODE){
-				
-				Element eElement = (Element) nNode;
-				occurSpot = new RedTideOccurSpot();
+		Node nNode;
+		Element eElement;
+		
+		for (int idx = 0; idx < docList.size(); idx++) {
 
-				occurSpot.setHjdCd(getTagValue("hjdCd", eElement));
-				occurSpot.setHjdName(getTagValue("hjdnm", eElement));
-				occurSpot.setProsWeek(getTagValue("prsw", eElement));
-				
-				occurSpot.setPros1Week(getTagValue("prs1w", eElement));
-				occurSpot.setPros2Week(getTagValue("prs2w", eElement));
-				occurSpot.setPros3Week(getTagValue("prs3w", eElement));
-				occurSpot.setPros4Week(getTagValue("prs4w", eElement));
+			doc = docList.get(idx);
 
-				occurSpotArr.add(occurSpot);
-			}	
+			header = doc.getElementsByTagName("header");
+
+			resultCode = getTagValue("resultCode", (Element) header.item(0));
+			resultMsg = getTagValue("resultMsg", (Element) header.item(0));
+			System.out.println(String.format("resultCode : %s, resultMsg : %s", resultCode, resultMsg));
+
+			nList = doc.getElementsByTagName("item");
+
+			for (int ndIdx = 0; ndIdx < nList.getLength(); ndIdx++) {
+				nNode = nList.item(ndIdx);
+
+				if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+
+					eElement = (Element) nNode;
+					
+					occurSpot = new RedTideOccurSpot();
+
+					occurSpot.setSrCode(getTagValue("srcode", eElement));
+					occurSpot.setCauseOrganism(getTagValue("dname", eElement));
+					occurSpot.setOrgDensityMax(getTagValue("edensity", eElement));
+					occurSpot.setOrgDensityMin(getTagValue("sdensity", eElement));
+					
+					occurSpot.setTempMax(getTagValue("ewt", eElement));
+					occurSpot.setTempMin(getTagValue("swt", eElement));
+					occurSpot.setSeaArea(getTagValue("oarea", eElement));
+					occurSpot.setRegDate(getTagValue("regdate", eElement));
+
+					occurSpotArr.add(occurSpot);
+					
+				}
+			}
+
 		}
 		
 	}
-
 
 	public int insertDB() {
 
 		int result = -1;
 		RedTideOccurSpot occurSpot;
 
+		FileWriter fw = null;
+		File file = null;
+		String query = "";
 		try {
 			if (dbController.connect()) {
+				System.out.println(String.format("occurSpotArr size : %d", occurSpotArr.size()));
+
+				file = new File(sqlfilePath);
+				fw = new FileWriter(file);
 				for (int arrIdx = 0; arrIdx < occurSpotArr.size(); arrIdx++) {
 					occurSpot = occurSpotArr.get(arrIdx);
-					if (!isExist(occurSpot)) {
-						result = dbController.insertRedTideOccurSpot(occurSpot);
-						System.out.println("Insert Result : " + result);
-					} else {
-						System.out.println("Exist Same Data");
-					} 
-
+					
+					query = dbController.getInsertQuery(occurSpot);
+					fw.write(query + "\n");
 				}
+				fw.flush();
+				fw.close();
+				
+				dbController.dumpRedTideOccur(file.getPath());
 
 			}
 
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException | IOException e) {
 			e.printStackTrace();
 		} finally {
 			if(dbController.connect())
@@ -90,7 +120,7 @@ public class RedTideOccurSpotAPI extends BaseAPI {
 		}
 		return result;
 	}
-
+	
 	public boolean isExist(RedTideOccurSpot occurSpot) {
 		int count = dbController.getCountRedTideOccurSpot(occurSpot);
 		return count != 0;

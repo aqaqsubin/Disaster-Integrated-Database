@@ -16,12 +16,12 @@ public class OccurInfoDBController extends JDBC {
 		PreparedStatement pstmt = null;
 
 		String deleteQuery = "SELECT count(*) FROM " + tableName
-				+ " WHERE hjdCd = ? AND prosWeek = DATE_FORMAT(?, '%Y-%m-%d %H:%i:%s')";
+				+ " WHERE title = ? AND srCode = ?";
 		try {
 
 			pstmt = con.prepareStatement(deleteQuery);
-			pstmt.setString(1, occurInfo.getHjdCd());
-			pstmt.setString(2, convertDate(occurInfo.getProsWeek()));
+			pstmt.setString(1, occurInfo.getTitle());
+			pstmt.setString(2, occurInfo.getSrCode());
 
 			resultSet = pstmt.executeQuery();
 
@@ -34,24 +34,48 @@ public class OccurInfoDBController extends JDBC {
 		}
 		return equalNum;
 	}
+	public String getInsertQuery(RedTideOccurInfo occurInfo) {
+		PreparedStatement pstmt = null;
+		String insertQuery = "INSERT INTO " + tableName
+				+ " (title, srCode, afterView, etc, state, regDate, report)"
+				+ " VALUES (?, ?, ?, ?, ?, DATE_FORMAT(?, '%Y-%m-%d %H:%i:%s'), ?)";
 
+		try {
+			pstmt = con.prepareStatement(insertQuery);
+
+			pstmt.setString(1, occurInfo.getTitle());
+			pstmt.setString(2, occurInfo.getSrCode());
+			pstmt.setString(3, occurInfo.getAfterView());
+			pstmt.setString(4, occurInfo.getEtc());
+			pstmt.setString(5, occurInfo.getState());
+			pstmt.setString(6, convertDate(occurInfo.getRegDate()));
+			pstmt.setString(7, occurInfo.getReport());
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return pstmt.toString().split("ClientPreparedStatement: ")[1]+";";
+	}
+	
 	public int insertRedTideOccurInfo(RedTideOccurInfo occurInfo) {
 		int r = -1;
 		PreparedStatement pstmt = null;
 		String insertQuery = "INSERT INTO " + tableName
-				+ " (hjdCd, hjdName, prosWeek, pros1Week, pros2Week, pros3Week, pros4Week)"
-				+ " VALUES (?, ? DATE_FORMAT(?, '%Y-%m-%d %H:%i:%s'), ?, ?, ?, ?)";
+				+ " (title, srCode, afterView, etc, state, regDate, report)"
+				+ " VALUES (?, ?, ?, ?, ?, DATE_FORMAT(?, '%Y-%m-%d %H:%i:%s'), ?)";
 		try {
 
 			pstmt = con.prepareStatement(insertQuery);
 
-			pstmt.setString(2, occurInfo.getHjdCd());
-			pstmt.setString(3, occurInfo.getHjdName());
-			pstmt.setString(1, convertDate(occurInfo.getProsWeek()));
-			pstmt.setString(4, occurInfo.getPros1Week());
-			pstmt.setString(5, occurInfo.getPros2Week());
-			pstmt.setString(6, occurInfo.getPros3Week());
-			pstmt.setString(7, occurInfo.getPros4Week());
+			pstmt.setString(1, occurInfo.getTitle());
+			pstmt.setString(2, occurInfo.getSrCode());
+			pstmt.setString(3, occurInfo.getAfterView());
+			pstmt.setString(4, occurInfo.getEtc());
+			pstmt.setString(5, occurInfo.getState());
+			pstmt.setString(6, convertDate(occurInfo.getRegDate()));
+			pstmt.setString(7, occurInfo.getReport());
 
 			r = pstmt.executeUpdate();
 

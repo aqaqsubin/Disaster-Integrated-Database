@@ -13,8 +13,6 @@ public class APIController {
 	private List<String> dateList;
 	private Calendar from_dttm, to_dttm;
 
-	private String serviceKey = "";
-
 	public APIController(String start_dttm, String end_dttm) {
 
 		from_dttm = Calendar.getInstance();
@@ -92,20 +90,19 @@ public class APIController {
 	public List<String> makeCalendar(Calendar from_dttm, Calendar to_dttm) {
 
 		List<String> calendar = new ArrayList<>();
-		String fromYearMonth = String.format("%4d%02d%0d", from_dttm.get(Calendar.YEAR),
+		String fromDate = String.format("%4d%02d%02d", from_dttm.get(Calendar.YEAR),
 				from_dttm.get(Calendar.MONTH) + 1, from_dttm.get(Calendar.DAY_OF_MONTH));
-		String toYearMonth = String.format("%4d%02d%02d", to_dttm.get(Calendar.YEAR), to_dttm.get(Calendar.MONTH) + 1,
+		String toDate = String.format("%4d%02d%02d", to_dttm.get(Calendar.YEAR), to_dttm.get(Calendar.MONTH) + 1,
 				from_dttm.get(Calendar.DAY_OF_MONTH));
 
-		while (!fromYearMonth.equals(toYearMonth)) {
+		while (!fromDate.equals(toDate)) {
 
-			calendar.add(fromYearMonth);
-			from_dttm.add(Calendar.MONTH, +1);
-			fromYearMonth = String.format("%4d%02d%02d", from_dttm.get(Calendar.YEAR),
+			calendar.add(fromDate);
+			from_dttm.add(Calendar.DAY_OF_MONTH, +1);
+			fromDate = String.format("%4d%02d%02d", from_dttm.get(Calendar.YEAR),
 					from_dttm.get(Calendar.MONTH) + 1, from_dttm.get(Calendar.DAY_OF_MONTH));
-
 		}
-		calendar.add(fromYearMonth);
+		calendar.add(fromDate);
 
 		return calendar;
 
