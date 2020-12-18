@@ -9,7 +9,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import base.BaseAPI;
-import farmingFrcst.FarmingFrcstList;
 
 public class LivinIndustryFrcstListAPI extends BaseAPI {
 

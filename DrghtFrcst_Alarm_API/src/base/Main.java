@@ -5,7 +5,11 @@ public class Main {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		APIController apiController = new APIController("20170101","20201126");
+		String strtDate = "20201101";
+		String endDate = "20201230";
+		
+		APIController apiController = new APIController(strtDate,endDate);
+		
 		apiController.getWthrFrcstInfoListAPI();
 		apiController.getLivinIndstryFrcstInfoListAPI();
 		apiController.getFarminFrcstInfoListAPI();
