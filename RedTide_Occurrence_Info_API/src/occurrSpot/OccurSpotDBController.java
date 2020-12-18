@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import base.JDBC;
 
 public class OccurSpotDBController extends JDBC {
-	
+
 	private String tableName = "RedTideOccurSpot";
 
 	public int getCountRedTideOccurSpot(RedTideOccurSpot occurSpot) {
@@ -15,13 +15,15 @@ public class OccurSpotDBController extends JDBC {
 		ResultSet resultSet = null;
 		PreparedStatement pstmt = null;
 
-		String deleteQuery = "SELECT count(*) FROM " + tableName
-				+ " WHERE hjdCd = ? AND prosWeek = DATE_FORMAT(?, '%Y-%m-%d %H:%i:%s')";
+		String deleteQuery = "SELECT count(*) FROM " + tableName + " WHERE srcode = ?";
+
+		if (occurSpot.getSrCode().equals("null"))
+			return -1;
+
 		try {
 
 			pstmt = con.prepareStatement(deleteQuery);
-			pstmt.setString(1, occurSpot.getHjdCd());
-			pstmt.setString(2, convertDate(occurSpot.getProsWeek()));
+			pstmt.setString(1, occurSpot.getSrCode());
 
 			resultSet = pstmt.executeQuery();
 
@@ -35,23 +37,49 @@ public class OccurSpotDBController extends JDBC {
 		return equalNum;
 	}
 
+	public String getInsertQuery(RedTideOccurSpot occurSpot) {
+		PreparedStatement pstmt = null;
+		String insertQuery = "INSERT INTO " + tableName
+				+ " (srCode, causeOrganism, orgDensityMax, orgDensityMin, tempMax, tempMin, seaArea ,regDate)"
+				+ " VALUES (?, ?, ?, ?, ?, ?, ?, DATE_FORMAT(?, '%Y-%m-%d %H:%i:%s'))";
+
+		try {
+			pstmt = con.prepareStatement(insertQuery);
+			pstmt.setString(1, occurSpot.getSrCode());
+			pstmt.setString(2, occurSpot.getCauseOrganism());
+			pstmt.setDouble(3, occurSpot.getOrgDensityMax());
+			pstmt.setDouble(4, occurSpot.getOrgDensityMin());
+			pstmt.setDouble(5, occurSpot.getTempMax());
+			pstmt.setDouble(6, occurSpot.getTempMin());
+			pstmt.setString(7, occurSpot.getSeaArea());
+			pstmt.setString(8, convertDate(occurSpot.getRegDate()));
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return pstmt.toString().split("ClientPreparedStatement: ")[1] + ";";
+	}
+
 	public int insertRedTideOccurSpot(RedTideOccurSpot occurSpot) {
 		int r = -1;
 		PreparedStatement pstmt = null;
 		String insertQuery = "INSERT INTO " + tableName
-				+ " (hjdCd, hjdName, prosWeek, pros1Week, pros2Week, pros3Week, pros4Week)"
-				+ " VALUES (?, ? DATE_FORMAT(?, '%Y-%m-%d %H:%i:%s'), ?, ?, ?, ?)";
+				+ " (srCode, causeOrganism, orgDensityMax, orgDensityMin, tempMax, tempMin, seaArea ,regDate)"
+				+ " VALUES (?, ?, ?, ?, ?, ?, ?, DATE_FORMAT(?, '%Y-%m-%d %H:%i:%s'))";
+
 		try {
 
 			pstmt = con.prepareStatement(insertQuery);
-
-			pstmt.setString(2, occurSpot.getHjdCd());
-			pstmt.setString(3, occurSpot.getHjdName());
-			pstmt.setString(1, convertDate(occurSpot.getProsWeek()));
-			pstmt.setString(4, occurSpot.getPros1Week());
-			pstmt.setString(5, occurSpot.getPros2Week());
-			pstmt.setString(6, occurSpot.getPros3Week());
-			pstmt.setString(7, occurSpot.getPros4Week());
+			pstmt.setString(1, occurSpot.getSrCode());
+			pstmt.setString(2, occurSpot.getCauseOrganism());
+			pstmt.setDouble(3, occurSpot.getOrgDensityMax());
+			pstmt.setDouble(4, occurSpot.getOrgDensityMin());
+			pstmt.setDouble(5, occurSpot.getTempMax());
+			pstmt.setDouble(6, occurSpot.getTempMin());
+			pstmt.setString(7, occurSpot.getSeaArea());
+			pstmt.setString(8, convertDate(occurSpot.getRegDate()));
 
 			r = pstmt.executeUpdate();
 
